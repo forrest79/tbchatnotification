@@ -1,0 +1,8 @@
+content   TbChatNotification                 chrome/content/
+
+skin      TbChatNotification   classic/1.0   chrome/skin/
+
+locale    TbChatNotification   en-EN         chrome/locale/en-EN/
+locale    TbChatNotification   cs-CZ         chrome/locale/cs-CZ/
+
+overlay   chrome://messenger/content/messenger.xul   chrome://TbChatNotification/content/overlay.xul

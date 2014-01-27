@@ -1,0 +1,7 @@
+<!ENTITY prefwindow.title "Thunderbird Chat Notification - settings">
+<!ENTITY paneMain.title "Main">
+<!ENTITY showbody.label "Show message body">
+<!ENTITY showbody.accesskey "S">
+<!ENTITY playsound.label "Play sound">
+<!ENTITY playsound.accesskey "P">
+<!ENTITY soundfile.label "Custom sound">

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+
+    <em:id>tbchatnotification@forrest79.net</em:id>
+    <em:type>2</em:type>
+    <em:version>1.0.0</em:version>
+		<em:iconURL>chrome://TbChatNotification/skin/icon32.png</em:iconURL>
+    <em:optionsURL>chrome://TbChatNotification/content/options.xul</em:optionsURL>
+
+    <em:localized>
+      <Description>
+        <em:name>Thunderbird Chat Notification</em:name>
+        <em:locale>en-EN</em:locale>
+        <em:description>Chat notification for Mozilla Thunderbird.</em:description>
+        <em:creator>Forrest79.net</em:creator>
+        <em:developer>Jakub Trmota</em:developer>
+        <em:homepageURL>http://forrest79.net/</em:homepageURL>
+      </Description>
+    </em:localized>
+
+    <em:localized>
+      <Description>
+        <em:name>Thunderbird Chat Notification</em:name>
+        <em:locale>cs-CZ</em:locale>
+        <em:description>Chat notifikace pro Mozilla Thunderbird.</em:description>
+        <em:creator>Forrest79.net</em:creator>
+        <em:developer>Jakub Trmota</em:developer>
+        <em:homepageURL>http://forrest79.net/</em:homepageURL>
+      </Description>
+    </em:localized>
+
+    <!-- Thunderbird -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</em:id>
+        <em:minVersion>4.0</em:minVersion>
+        <em:maxVersion>24.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+  </Description>
+
+</RDF>
