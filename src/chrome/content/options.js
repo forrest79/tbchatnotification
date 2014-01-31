@@ -1,19 +1,26 @@
+(function() {
+
+this.tbchatnotification = this.tbchatnotification || {};
+
 "use strict";
 
 var options = {
 
 	/**
-	 * Show select file dialog and save path to textbox.
-	 * @param textbox XUL element
-	 */
-	getFile : function(textbox) {
+	* Show select file dialog and save path to textbox.
+	* @param textboxId string
+	*/
+	getFile : function(textboxId) {
+	try {
+		var textbox = this.$(textboxId);
+	
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes['@mozilla.org/filepicker;1']
-							 .createInstance(nsIFilePicker);
+			.createInstance(nsIFilePicker);
 
 		if (textbox.value) {
 			var initDir = Components.classes['@mozilla.org/file/local;1']
-											.createInstance(Components.interfaces.nsILocalFile);
+				.createInstance(Components.interfaces.nsIFile);
 			initDir.initWithPath(textbox.value);
 
 			if (!initDir.isDirectory()) {
@@ -29,14 +36,35 @@ var options = {
 		if (dialog == nsIFilePicker.returnOK){
 			textbox.value = fp.file.path;
 		}
+	} catch (e) {
+	dump(e);
+	}
 	},
 
 	/**
-	 * Get localized string.
-	 * @return string
-	 */
+	* Get localized string.
+	* @return string
+	*/
 	string : function(string) {
-		return document.getElementById('strings').getString('options.' + string);
+		return this.$('Strings').getString('options.' + string);
+	},
+
+	/**
+	* Get element on document.
+	* @param id string
+	* @return object XUL
+	*/
+	$ : function(id) {
+		id = 'tbchatnotification' + id;
+		if (document.getElementById(id)) {
+			return document.getElementById(id);
+		} else {
+			throw 'No element "' + id + '".';
+		}
 	}
 
 }
+
+tbchatnotification.options = options;
+
+})();

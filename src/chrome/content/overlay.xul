@@ -2,12 +2,12 @@
 
 <overlay id="tbchatnotificationOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml">
 
-  <!-- JS: Overlay -->
-  <script type="text/javascript" src="overlay.js" />
+	<!-- JS: Overlay -->
+	<script type="text/javascript" src="overlay.js" />
 
-  <!-- STRINGS -->
-  <stringbundleset>
-    <stringbundle id="tbchatnotificationStrings" src="chrome://TbChatNotification/locale/overlay.properties" />
-  </stringbundleset>
+	<!-- STRINGS -->
+	<stringbundleset>
+		<stringbundle id="tbchatnotificationStrings" src="chrome://TbChatNotification/locale/overlay.properties" />
+	</stringbundleset>
 
 </overlay>

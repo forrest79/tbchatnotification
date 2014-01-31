@@ -27,7 +27,7 @@ var TbChatNotifier = {
 		  .classes['@mozilla.org/preferences-service;1']
 		  .getService(Ci.nsIPrefService)
 		  .getBranch('extensions.tbchatnotification.');
-		prefs.QueryInterface(Ci.nsIPrefBranch2);
+		prefs.QueryInterface(Ci.nsIPrefBranch);
 		var options = this.options;
 		options.observe = function(subject, topic, data) {
 			if (topic != 'nsPref:changed') {
@@ -92,7 +92,7 @@ var TbChatNotifier = {
 			options = this.options;
 
 		if (options.playsound) {
-			audio.src = options.soundfile ? ('file://' + options.soundfile) : 'chrome://TbChatNotification/content/sound/notification.ogg';
+			audio.src = (options.soundfile ? ('file://' + options.soundfile) : 'chrome://TbChatNotification/content/sound/notification.ogg') + '#t=,5';
 			audio.play();
 		}
 	},

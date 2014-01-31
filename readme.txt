@@ -2,6 +2,7 @@ Thunderbird Chat Notification © Jakub Trmota, 2014 (http://forrest79.net)
 
 
 Chat notification for Mozilla Thunderbird. Notification with alert (click on alert open conversation) and sound.
+@thanksto Wladimir Palant for inspiration with his chatnotification plugin
 
 
 HOW TO USE:
@@ -22,6 +23,7 @@ Run build/build-xpi.bat on Windows or build/build-xpi.sh on Linux. You need only
 
 HISTORY
 =======
+1.0.1 [2014-01-31] - Minimal Mozilla Thunderbird version set to 15 (first with chat), update depracated interfaces and some warnings, max sound time set to 5s
 1.0.0 [2014-01-28] - First public version.
 
 

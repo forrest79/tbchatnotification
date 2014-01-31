@@ -5,28 +5,28 @@
 
 <prefwindow id="extbrainsip-preferences" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="&prefwindow.title;">
 
-  <!-- JS: Options -->
-  <script type="application/javascript" src="options.js" />
+	<!-- JS: Options -->
+	<script type="application/javascript" src="options.js" />
 
-  <!-- STRINGS -->
-  <stringbundleset>
-    <stringbundle id="strings" src="chrome://TbChatNotification/locale/options.properties" />
-  </stringbundleset>
+	<!-- STRINGS -->
+	<stringbundleset>
+		<stringbundle id="tbchatnotificationStrings" src="chrome://TbChatNotification/locale/options.properties" />
+	</stringbundleset>
 
-  <!-- OPTIONS PANE -->
-  <prefpane id="paneMain" label="&paneMain.title;">
-    <preferences>
-      <preference id="showbody" name="extensions.tbchatnotification.showbody" type="bool" />
-      <preference id="playsound" name="extensions.tbchatnotification.playsound" type="bool" />
-      <preference id="soundfile" name="extensions.tbchatnotification.soundfile" type="string" />
-    </preferences>
-		<checkbox preference="showbody" label="&showbody.label;" accesskey="&showbody.accesskey;" />
-		<checkbox preference="playsound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
+	<!-- OPTIONS PANE -->
+	<prefpane id="paneMain" label="&paneMain.title;">
+		<preferences>
+			<preference id="tbchatnotificationShowbody" name="extensions.tbchatnotification.showbody" type="bool" />
+			<preference id="tbchatnotificationPlaysound" name="extensions.tbchatnotification.playsound" type="bool" />
+			<preference id="tbchatnotificationSoundfile" name="extensions.tbchatnotification.soundfile" type="string" />
+		</preferences>
+		<checkbox preference="tbchatnotificationShowbody" label="&showbody.label;" accesskey="&showbody.accesskey;" />
+		<checkbox preference="tbchatnotificationPlaysound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
 		<label control="textSoundFile">&soundfile.label;</label>
 		<hbox>
-			<textbox id="textSoundFile" preference="soundfile" />
-			<button label="..." oncommand="options.getFile(document.getElementById('soundfile'));" />
+			<textbox id="textSoundFile" preference="tbchatnotificationSoundfile" />
+			<button label="..." oncommand="tbchatnotification.options.getFile('Soundfile');" />
 		</hbox>
-  </prefpane>
+	</prefpane>
 
 </prefwindow>
