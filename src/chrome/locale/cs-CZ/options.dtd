@@ -7,3 +7,5 @@
 <!ENTITY soundfile.label "Vlastní zvuk">
 <!ENTITY flashicon.label "Rozblikat ikonu Thunderbirdu">
 <!ENTITY flashicon.accesskey "B">
+<!ENTITY mucnotify.label "Zobrazovat upozornění z více-uživatelských chatů">
+<!ENTITY mucnotify.accesskey "V">

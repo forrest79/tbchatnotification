@@ -7,3 +7,5 @@
 <!ENTITY soundfile.label "Custom sound">
 <!ENTITY flashicon.label "Flash Thunderbird icon">
 <!ENTITY flashicon.accesskey "F">
+<!ENTITY mucnotify.label "Show notifications from multi-user chats">
+<!ENTITY mucnotify.accesskey "M">

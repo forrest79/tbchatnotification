@@ -20,6 +20,7 @@
 			<preference id="tbchatnotificationPlaySound" name="extensions.tbchatnotification.playsound" type="bool" />
 			<preference id="tbchatnotificationSoundFile" name="extensions.tbchatnotification.soundfile" type="string" />
 			<preference id="tbchatnotificationFlashIcon" name="extensions.tbchatnotification.flashicon" type="bool" />
+			<preference id="tbchatnotificationMUCNotify" name="extensions.tbchatnotification.mucnotify" type="bool" />
 		</preferences>
 		<checkbox preference="tbchatnotificationShowBody" label="&showbody.label;" accesskey="&showbody.accesskey;" />
 		<checkbox preference="tbchatnotificationPlaySound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
@@ -29,6 +30,7 @@
 			<button label="..." oncommand="tbchatnotification.options.getFile('SoundFile');" />
 		</hbox>
 		<checkbox preference="tbchatnotificationFlashIcon" label="&flashicon.label;" accesskey="&flashicon.accesskey;" />
+		<checkbox preference="tbchatnotificationMUCNotify" label="&mucnotify.label;" accesskey="&mucnotify.accesskey;" />
 	</prefpane>
 
 </prefwindow>

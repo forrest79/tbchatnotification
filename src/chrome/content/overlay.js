@@ -10,13 +10,18 @@ var TbChatNotifier = {
 
 	prefs : null,
 	observer : null,
+	observerTopics : {
+		newDirectedIncomingMessage : 'new-directed-incoming-message',
+		newText : 'new-text'
+	},
 	audio : null,
 
 	options : {
 		showbody : false,
 		playsound : false,
 		soundfile : '',
-		flashicon : false
+		flashicon : false,
+		mucnotify : false
 	},
 
 	/**
@@ -29,6 +34,7 @@ var TbChatNotifier = {
 		  .getService(Ci.nsIPrefService)
 		  .getBranch('extensions.tbchatnotification.');
 		prefs.QueryInterface(Ci.nsIPrefBranch);
+		
 		var options = this.options;
 		options.observe = function(subject, topic, data) {
 			if (topic != 'nsPref:changed') {
@@ -48,14 +54,18 @@ var TbChatNotifier = {
 				case 'flashicon' :
 					this.flashicon = prefs.getBoolPref('flashicon');
 					break;
+				case 'mucnotify' :
+					this.mucnotify = prefs.getBoolPref('mucnotify');
+					break;
 			}
 		}
 		prefs.addObserver('', options, false);
-
+		
 		options.showbody = prefs.getBoolPref('showbody');
 		options.playsound = prefs.getBoolPref('playsound');
 		options.soundfile = prefs.getCharPref('soundfile');
 		options.flashicon = prefs.getBoolPref('flashicon');
+		options.mucnotify = prefs.getBoolPref('mucnotify');
 
 		// Audio
 		this.audio = new Audio();
@@ -64,29 +74,41 @@ var TbChatNotifier = {
 		Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 		Cu.import('resource://gre/modules/Services.jsm');
 
-		var OBSERVER_TOPIC = 'new-directed-incoming-message';
+		var imServices = {};
+		Cu.import("resource:///modules/imServices.jsm", imServices);
+		imServices = imServices.Services;
+
+		var observerTopics = this.observerTopics;
 
 		var notifier = this;
 		var observer = this.observer = {
 			observe: function(subject, topic, data) {
-				if (topic == OBSERVER_TOPIC) {
+				if (subject.incoming && (((topic == observerTopics.newDirectedIncomingMessage) && !options.mucnotify) || ((topic == observerTopics.newText) && options.mucnotify))) {
 					notifier.play();
-					notifier.notify(subject.alias, subject.originalMessage);
+					notifier.notify(subject.alias, subject.originalMessage, imServices.conversations.getUIConversation(subject.conversation).title);
 				}
 			},
 
 			QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsISupportsWeakReference])
 		};
 
-		Services.obs.addObserver(observer, OBSERVER_TOPIC, true);
+		for (var topic in observerTopics) {
+			Services.obs.addObserver(observer, observerTopics[topic], true);
+		}
 	},
 
 	/**
 	 * Unload chat notifier.
 	 */
 	unload : function() {
-		this.prefs.addObserver('', this.options);
-		Services.obs.removeObserver(this.observer, OBSERVER_TOPIC);
+		this.prefs.removeObserver('', this.options);
+
+		var observer = this.observer,
+			observerTopics = this.observerTopics;
+			
+		for (var topic in observerTopics) {
+			Services.obs.removeObserver(observer, observerTopics[topic]);
+		}
 	},
 
 	/**
@@ -106,8 +128,9 @@ var TbChatNotifier = {
 	 * Show non-modal alert message.
 	 * @param from string
 	 * @param message string
+	 * @param conversation string
 	 */
-	notify : function(from, message) {
+	notify : function(from, message, conversation) {
 		var options = this.options;
 
 		try {
@@ -148,7 +171,7 @@ var TbChatNotifier = {
 
 			Cc['@mozilla.org/alerts-service;1']
 				.getService(Ci.nsIAlertsService)
-				.showAlertNotification('chrome://TbChatNotification/skin/icon32.png', title, text, true, from, listener);
+				.showAlertNotification('chrome://TbChatNotification/skin/icon32.png', title, text, true, conversation, listener);
 
 			if (options.flashicon) {
 				window.getAttention();
