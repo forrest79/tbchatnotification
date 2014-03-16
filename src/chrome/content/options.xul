@@ -16,17 +16,19 @@
 	<!-- OPTIONS PANE -->
 	<prefpane id="paneMain" label="&paneMain.title;">
 		<preferences>
-			<preference id="tbchatnotificationShowbody" name="extensions.tbchatnotification.showbody" type="bool" />
-			<preference id="tbchatnotificationPlaysound" name="extensions.tbchatnotification.playsound" type="bool" />
-			<preference id="tbchatnotificationSoundfile" name="extensions.tbchatnotification.soundfile" type="string" />
+			<preference id="tbchatnotificationShowBody" name="extensions.tbchatnotification.showbody" type="bool" />
+			<preference id="tbchatnotificationPlaySound" name="extensions.tbchatnotification.playsound" type="bool" />
+			<preference id="tbchatnotificationSoundFile" name="extensions.tbchatnotification.soundfile" type="string" />
+			<preference id="tbchatnotificationFlashIcon" name="extensions.tbchatnotification.flashicon" type="bool" />
 		</preferences>
-		<checkbox preference="tbchatnotificationShowbody" label="&showbody.label;" accesskey="&showbody.accesskey;" />
-		<checkbox preference="tbchatnotificationPlaysound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
+		<checkbox preference="tbchatnotificationShowBody" label="&showbody.label;" accesskey="&showbody.accesskey;" />
+		<checkbox preference="tbchatnotificationPlaySound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
 		<label control="textSoundFile">&soundfile.label;</label>
 		<hbox>
-			<textbox id="textSoundFile" preference="tbchatnotificationSoundfile" />
-			<button label="..." oncommand="tbchatnotification.options.getFile('Soundfile');" />
+			<textbox id="textSoundFile" preference="tbchatnotificationSoundFile" />
+			<button label="..." oncommand="tbchatnotification.options.getFile('SoundFile');" />
 		</hbox>
+		<checkbox preference="tbchatnotificationFlashIcon" label="&flashicon.label;" accesskey="&flashicon.accesskey;" />
 	</prefpane>
 
 </prefwindow>

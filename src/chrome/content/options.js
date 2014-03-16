@@ -11,34 +11,34 @@ var options = {
 	* @param textboxId string
 	*/
 	getFile : function(textboxId) {
-	try {
-		var textbox = this.$(textboxId);
-	
-		var nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes['@mozilla.org/filepicker;1']
-			.createInstance(nsIFilePicker);
+		try {
+			var textbox = this.$(textboxId);
+		
+			var nsIFilePicker = Components.interfaces.nsIFilePicker;
+			var fp = Components.classes['@mozilla.org/filepicker;1']
+				.createInstance(nsIFilePicker);
 
-		if (textbox.value) {
-			var initDir = Components.classes['@mozilla.org/file/local;1']
-				.createInstance(Components.interfaces.nsIFile);
-			initDir.initWithPath(textbox.value);
+			if (textbox.value) {
+				var initDir = Components.classes['@mozilla.org/file/local;1']
+					.createInstance(Components.interfaces.nsIFile);
+				initDir.initWithPath(textbox.value);
 
-			if (!initDir.isDirectory()) {
-				initDir = initDir.parent;
+				if (!initDir.isDirectory()) {
+					initDir = initDir.parent;
+				}
+
+				fp.displayDirectory = initDir;
 			}
 
-			fp.displayDirectory = initDir;
+			fp.init(window, this.string('selectfile'), nsIFilePicker.modeOpen);
+			fp.appendFilter(this.string('supportedfiles'), '*.mp3; *.wav; *.aac; *.mp4; *.ogg; *.webm;');
+			var dialog = fp.show();
+			if (dialog == nsIFilePicker.returnOK){
+				textbox.value = fp.file.path;
+			}
+		} catch (e) {
+			dump(e);
 		}
-
-		fp.init(window, this.string('selectfile'), nsIFilePicker.modeOpen);
-		fp.appendFilter(this.string('supportedfiles'), '*.mp3; *.wav; *.aac; *.mp4; *.ogg; *.webm;');
-		var dialog = fp.show();
-		if (dialog == nsIFilePicker.returnOK){
-			textbox.value = fp.file.path;
-		}
-	} catch (e) {
-	dump(e);
-	}
 	},
 
 	/**

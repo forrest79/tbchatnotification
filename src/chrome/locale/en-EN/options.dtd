@@ -5,3 +5,5 @@
 <!ENTITY playsound.label "Play sound">
 <!ENTITY playsound.accesskey "P">
 <!ENTITY soundfile.label "Custom sound">
+<!ENTITY flashicon.label "Flash Thunderbird icon">
+<!ENTITY flashicon.accesskey "F">

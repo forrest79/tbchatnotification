@@ -15,7 +15,8 @@ var TbChatNotifier = {
 	options : {
 		showbody : false,
 		playsound : false,
-		soundfile : ''
+		soundfile : '',
+		flashicon : false
 	},
 
 	/**
@@ -44,6 +45,9 @@ var TbChatNotifier = {
 				case 'soundfile' :
 					this.soundfile = prefs.getCharPref('soundfile');
 					break;
+				case 'flashicon' :
+					this.flashicon = prefs.getBoolPref('flashicon');
+					break;
 			}
 		}
 		prefs.addObserver('', options, false);
@@ -51,6 +55,7 @@ var TbChatNotifier = {
 		options.showbody = prefs.getBoolPref('showbody');
 		options.playsound = prefs.getBoolPref('playsound');
 		options.soundfile = prefs.getCharPref('soundfile');
+		options.flashicon = prefs.getBoolPref('flashicon');
 
 		// Audio
 		this.audio = new Audio();
@@ -103,8 +108,10 @@ var TbChatNotifier = {
 	 * @param message string
 	 */
 	notify : function(from, message) {
+		var options = this.options;
+
 		try {
-			var listener = {
+			var	listener = {
 				observe : function(subject, topic, data) {
 					if (topic == 'alertclickcallback') {
 						try {
@@ -136,12 +143,16 @@ var TbChatNotifier = {
 				}
 			}
 
-			var title = this.string('newmessage') + ' ' + from;
-			var text = this.options.showbody ? (message > 128 ? (message.substring(0, 128) + '...') : message) : this.string('showmessage');
+			var title = this.string('newmessage') + ' ' + from,
+				text = options.showbody ? (message > 128 ? (message.substring(0, 128) + '...') : message) : this.string('showmessage');
 
 			Cc['@mozilla.org/alerts-service;1']
 				.getService(Ci.nsIAlertsService)
 				.showAlertNotification('chrome://TbChatNotification/skin/icon32.png', title, text, true, from, listener);
+
+			if (options.flashicon) {
+				window.getAttention();
+			}
 		} catch(e) {
 			// prevents runtime error on platforms that don't implement nsIAlertsService
 		}

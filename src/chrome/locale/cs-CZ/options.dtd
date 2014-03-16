@@ -5,3 +5,5 @@
 <!ENTITY playsound.label "Přehrát zvuk">
 <!ENTITY playsound.accesskey "P">
 <!ENTITY soundfile.label "Vlastní zvuk">
+<!ENTITY flashicon.label "Rozblikat ikonu Thunderbirdu">
+<!ENTITY flashicon.accesskey "B">
