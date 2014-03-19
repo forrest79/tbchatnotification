@@ -6,6 +6,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
+const osWindows = Cc['@mozilla.org/xre/app-info;1'].getService(Ci.nsIXULRuntime).OS == 'WINNT';
+	
 var TbChatNotifier = {
 
 	prefs : null,
@@ -171,7 +173,7 @@ var TbChatNotifier = {
 			// prevents runtime error on platforms that don't implement nsIAlertsService
 		}
 
-		if (options.trayicon) {
+		if (osWindows && options.trayicon) {
 			var trayicon = this.trayicon;
 			
 			trayicon.conversation = conversation;

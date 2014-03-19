@@ -65,6 +65,16 @@ var options = {
 
 }
 
+/**
+ * Load options...
+ */
+window.addEventListener('load', function() {
+	if (Components.classes['@mozilla.org/xre/app-info;1'].getService(Components.interfaces.nsIXULRuntime).OS != 'WINNT') {
+		options.$('TrayIconCheckbox').hidden = true;
+		window.sizeToContent();
+	}
+}, false);
+
 tbchatnotification.options = options;
 
 })();

@@ -30,7 +30,7 @@
 			<textbox id="textSoundFile" preference="tbchatnotificationSoundFile" />
 			<button label="..." oncommand="tbchatnotification.options.getFile('SoundFile');" />
 		</hbox>
-		<checkbox preference="tbchatnotificationTrayIcon" label="&trayicon.label;" accesskey="&trayicon.accesskey;" />
+		<checkbox preference="tbchatnotificationTrayIcon" label="&trayicon.label;" accesskey="&trayicon.accesskey;" id="tbchatnotificationTrayIconCheckbox" />
 		<checkbox preference="tbchatnotificationFlashIcon" label="&flashicon.label;" accesskey="&flashicon.accesskey;" />
 		<checkbox preference="tbchatnotificationMUCNotify" label="&mucnotify.label;" accesskey="&mucnotify.accesskey;" />
 	</prefpane>
