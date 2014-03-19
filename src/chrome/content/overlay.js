@@ -12,14 +12,21 @@ var TbChatNotifier = {
 	observer : null,
 	observerTopics : {
 		newDirectedIncomingMessage : 'new-directed-incoming-message',
-		newText : 'new-text'
+		newText : 'new-text',
+		unreadImCountChanged : 'unread-im-count-changed'
 	},
 	audio : null,
+	
+	trayicon : {
+		instance : null,
+		conversation : ''
+	},
 
 	options : {
 		showbody : false,
 		playsound : false,
 		soundfile : '',
+		trayicon : false,
 		flashicon : false,
 		mucnotify : false
 	},
@@ -51,6 +58,9 @@ var TbChatNotifier = {
 				case 'soundfile' :
 					this.soundfile = prefs.getCharPref('soundfile');
 					break;
+				case 'trayicon' :
+					this.trayicon = prefs.getBoolPref('trayicon');
+					break;
 				case 'flashicon' :
 					this.flashicon = prefs.getBoolPref('flashicon');
 					break;
@@ -64,6 +74,7 @@ var TbChatNotifier = {
 		options.showbody = prefs.getBoolPref('showbody');
 		options.playsound = prefs.getBoolPref('playsound');
 		options.soundfile = prefs.getCharPref('soundfile');
+		options.trayicon = prefs.getBoolPref('trayicon');
 		options.flashicon = prefs.getBoolPref('flashicon');
 		options.mucnotify = prefs.getBoolPref('mucnotify');
 
@@ -86,6 +97,10 @@ var TbChatNotifier = {
 				if (subject.incoming && (((topic == observerTopics.newDirectedIncomingMessage) && !options.mucnotify) || ((topic == observerTopics.newText) && options.mucnotify))) {
 					notifier.play();
 					notifier.notify(subject.alias, subject.originalMessage, imServices.conversations.getUIConversation(subject.conversation).title);
+				} else if (topic == observerTopics.unreadImCountChanged) {
+					if (data == 0) {
+						notifier.closeTrayIcon();
+					}
 				}
 			},
 
@@ -109,6 +124,8 @@ var TbChatNotifier = {
 		for (var topic in observerTopics) {
 			Services.obs.removeObserver(observer, observerTopics[topic]);
 		}
+		
+		this.closeTrayIcon()
 	},
 
 	/**
@@ -131,53 +148,89 @@ var TbChatNotifier = {
 	 * @param conversation string
 	 */
 	notify : function(from, message, conversation) {
-		var options = this.options;
+		var notifier = this,
+			options = this.options;
+
+		var title = this.string('newmessage') + ' ' + from,
+			text = options.showbody ? (message > 128 ? (message.substring(0, 128) + '...') : message) : this.string('showmessage');
 
 		try {
 			var	listener = {
 				observe : function(subject, topic, data) {
 					if (topic == 'alertclickcallback') {
-						try {
-							var win = Services.wm.getMostRecentWindow('mail:3pane');
-							if (win) {
-								win.focus();
-								win.showChatTab();
-
-								var contacts = document.getElementById('contactlistbox');
-								for (var i = 0; i < contacts.itemCount; i++) {
-									var contact = contacts.getItemAtIndex(i);
-									
-									if (!contact || contact.hidden || (contact.localName != 'imconv')) {
-										continue;
-									} else if (contact.displayName == data) {
-										contacts.selectedIndex = i;
-										break;
-									}
-								}
-							} else {
-								window.openDialog('chrome://messenger/content/', '_blank',
-									'chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar',
-									null, {tabType: 'chat', tabParams: {}});
-							}
-						} catch (e) {
-							// prevents runtime error
-						}
+						this.openChat(data);
 					}
 				}
 			}
-
-			var title = this.string('newmessage') + ' ' + from,
-				text = options.showbody ? (message > 128 ? (message.substring(0, 128) + '...') : message) : this.string('showmessage');
 
 			Cc['@mozilla.org/alerts-service;1']
 				.getService(Ci.nsIAlertsService)
 				.showAlertNotification('chrome://TbChatNotification/skin/icon32.png', title, text, true, conversation, listener);
 
-			if (options.flashicon) {
-				window.getAttention();
-			}
 		} catch(e) {
 			// prevents runtime error on platforms that don't implement nsIAlertsService
+		}
+
+		if (options.trayicon) {
+			var trayicon = this.trayicon;
+			
+			trayicon.conversation = conversation;
+
+			if (!trayicon.instance) {
+				Cu.import('resource://TbChatNotification/trayiconservice.jsm');
+
+				window.addEventListener('TrayDblClick', function(event) {
+						notifier.openChat(trayicon.conversation);
+				}, true);
+			}
+			
+			trayicon.instance = TrayIconService.createIcon(window, title);
+		}
+
+		if (options.flashicon) {
+			window.getAttention();
+		}
+	},
+
+	/*
+	 * Open chat tab with conversation.
+	 * @param conversation string
+	 */
+	openChat : function(conversation) {
+		try {
+			var win = Services.wm.getMostRecentWindow('mail:3pane');
+			if (win) {
+				win.focus();
+				win.showChatTab();
+
+				var contacts = document.getElementById('contactlistbox');
+				for (var i = 0; i < contacts.itemCount; i++) {
+					var contact = contacts.getItemAtIndex(i);
+					
+					if (!contact || contact.hidden || (contact.localName != 'imconv')) {
+						continue;
+					} else if (contact.displayName == conversation) {
+						contacts.selectedIndex = i;
+						break;
+					}
+				}
+			} else {
+				window.openDialog('chrome://messenger/content/', '_blank',
+					'chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar',
+					null, {tabType: 'chat', tabParams: {}});
+			}
+		} catch (e) {
+			// prevents runtime error
+		}
+	},
+
+	/*
+	 * Close tray icon.
+	 */
+	closeTrayIcon : function() {
+		var trayicon = this.trayicon;
+		if (trayicon.instance) {
+			trayicon.instance.close();
 		}
 	},
 

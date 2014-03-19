@@ -1,0 +1,6 @@
+EXPORTS
+	TbChatNotification_Init
+	TbChatNotification_Destroy
+	TbChatNotification_CreateIcon
+	TbChatNotification_DestroyIcon
+	TbChatNotification_GetBaseWindow

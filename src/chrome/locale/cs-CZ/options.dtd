@@ -5,6 +5,8 @@
 <!ENTITY playsound.label "Přehrát zvuk">
 <!ENTITY playsound.accesskey "P">
 <!ENTITY soundfile.label "Vlastní zvuk">
+<!ENTITY trayicon.label "Zobrazit ikonu v oznamovací oblasti">
+<!ENTITY trayicon.accesskey "O">
 <!ENTITY flashicon.label "Rozblikat ikonu Thunderbirdu">
 <!ENTITY flashicon.accesskey "B">
 <!ENTITY mucnotify.label "Zobrazovat upozornění z více-uživatelských chatů">
