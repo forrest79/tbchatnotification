@@ -19,13 +19,14 @@ typedef struct _mouseevent_t {
 typedef void (*mouseevent_callback_t)(void *handle, mouseevent_t *event);
 typedef void (*minimize_callback_t)(void *handle, int type);
 
-void TbChatNotification_Init();
+DWORD WINAPI ThreadProc(LPVOID lpParam);
+static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+void TbChatNotification_Init(mouseevent_callback_t callback);
 void TbChatNotification_Destroy();
 
-BOOL TbChatNotification_CreateIcon(void *handle, wchar_t *title, mouseevent_callback_t callback);
-BOOL TbChatNotification_DestroyIcon(void *handle);
-
-void* TbChatNotification_GetBaseWindow(wchar_t *title);
+BOOL TbChatNotification_CreateIcon(wchar_t *title);
+BOOL TbChatNotification_DestroyIcon();
 
 #ifdef __cplusplus
 } // extern "C"

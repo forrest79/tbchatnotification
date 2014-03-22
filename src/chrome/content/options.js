@@ -8,11 +8,11 @@ var options = {
 
 	/**
 	* Show select file dialog and save path to textbox.
-	* @param textboxId string
+	* @param string elementId
 	*/
-	getFile : function(textboxId) {
+	getFile : function(elementId) {
 		try {
-			var textbox = this.$(textboxId);
+			var textbox = this.$(elementId);
 		
 			var nsIFilePicker = Components.interfaces.nsIFilePicker;
 			var fp = Components.classes['@mozilla.org/filepicker;1']
@@ -42,6 +42,13 @@ var options = {
 	},
 
 	/**
+	 * Update control properties.
+	 */
+	updateControls : function() {
+		this.$('PlaySoundFocusedCheckbox').disabled = !this.$('PlaySound').value;
+	},
+
+	/**
 	* Get localized string.
 	* @return string
 	*/
@@ -51,13 +58,13 @@ var options = {
 
 	/**
 	* Get element on document.
-	* @param id string
+	* @param string id
 	* @return object XUL
 	*/
 	$ : function(id) {
-		id = 'tbchatnotification' + id;
-		if (document.getElementById(id)) {
-			return document.getElementById(id);
+		var element = document.getElementById('tbchatnotification' + id);
+		if (element) {
+			return element;
 		} else {
 			throw 'No element "' + id + '".';
 		}
@@ -73,6 +80,8 @@ window.addEventListener('load', function() {
 		options.$('TrayIconCheckbox').hidden = true;
 		window.sizeToContent();
 	}
+
+	options.updateControls();
 }, false);
 
 tbchatnotification.options = options;

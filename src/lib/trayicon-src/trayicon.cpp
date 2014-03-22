@@ -5,18 +5,17 @@
 #include <windows.h>
 #include <string.h>
 #include <new>
+#include <stdio.h> 
 
 #include "trayicon.h"
 #include "resource.h"
-
-static const wchar_t kTrayMessage[]  = L"_TBCHATNOTIFICATION_TrayMessageW";
-static const wchar_t kTrayCallback[]  = L"_TBCHATNOTIFICATION_TrayCallbackW";
-static const wchar_t kOldProc[] = L"_TBCHATNOTIFICATION_WRAPPER_OLD_PROC";
 
 static const wchar_t kIcon[] = L"_TBCHATNOTIFICATION_ICON";
 static const wchar_t kIconClick[] = L"_TBCHATNOTIFICATION_ICON_CLICK";
 static const wchar_t kIconData[] = L"_TBCHATNOTIFICATION_ICON_DATA";
 static const wchar_t kIconMouseEventProc[] = L"_TBCHATNOTIFICATION_ICON_MOUSEEVENTPROC";
+
+static const wchar_t kClassName[] = L"_TBCHATNOTIFICATION_CLASS";
 
 typedef BOOL (WINAPI *pChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
 #ifndef MGSFLT_ADD
@@ -30,6 +29,11 @@ static UINT WM_TRAYMESSAGE = 0;
 static UINT WM_TRAYCALLBACK = 0;
 
 HINSTANCE trayInstance = NULL;
+WNDCLASSEX wc;
+HWND hwnd = NULL;
+
+BOOL initialized = FALSE;
+BOOL active = FALSE;
 
 /**
  * DllMain entry
@@ -75,6 +79,21 @@ public:
 		return dwMajorVersion >= 6;
 	}
 };
+
+/**
+ * Massage loop in thread
+ */
+DWORD WINAPI ThreadProc(LPVOID lpParam)
+{
+	MSG messages;
+	while (GetMessage(&messages, NULL, 0, 0) > 0)
+    {
+		TranslateMessage(&messages);
+        DispatchMessage(&messages);
+    }
+
+	return 1;
+}
 
 /**
  * Helper: Subclassed Windows WNDPROC
@@ -234,7 +253,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 WndProcEnd:
 	// Call the old WNDPROC or at lest DefWindowProc
-	WNDPROC oldProc = reinterpret_cast<WNDPROC>(::GetPropW(hwnd, kOldProc));
+	WNDPROC oldProc = reinterpret_cast<WNDPROC>(::GetPropW(hwnd, L"_TBCHATNOTIFICATION_WRAPPER_OLD_PROC"));
 	if (oldProc != 0)
 	{
 		return ::CallWindowProcW(oldProc, hwnd, uMsg, wParam, lParam);
@@ -242,45 +261,83 @@ WndProcEnd:
 	return ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-void TbChatNotification_Init()
+void TbChatNotification_Init(mouseevent_callback_t callback)
 {
+	if (initialized)
+	{
+		return;
+	}
+
 	// Get TaskbarCreated
 	WM_TASKBARCREATED = RegisterWindowMessageW(L"TaskbarCreated");
 	// We register this as well, as we cannot know which WM_USER values are already taken
-	WM_TRAYMESSAGE = RegisterWindowMessageW(kTrayMessage);
-	WM_TRAYCALLBACK = RegisterWindowMessageW(kTrayCallback);
+	WM_TRAYMESSAGE = RegisterWindowMessageW(L"_TBCHATNOTIFICATION_TrayMessageW");
+	WM_TRAYCALLBACK = RegisterWindowMessageW(L"_TBCHATNOTIFICATION_TrayCallbackW");
+
+	wc.cbSize = sizeof(WNDCLASSEX);
+    wc.style = 0;
+    wc.lpfnWndProc = WndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = trayInstance;
+    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+    wc.lpszMenuName = NULL;
+    wc.lpszClassName = kClassName;
+    wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+
+    if(!RegisterClassEx(&wc))
+    {
+        return;
+    }
+
+	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, kClassName, L"Thunderbird Chat Notification", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, trayInstance, NULL);
+    if(hwnd == NULL)
+    {
+        return;
+    }
+
+	CreateThread(0, NULL, ThreadProc, (LPVOID)L"ThunderbirdChatNotificationThread", NULL, NULL);
 
 	// Vista (Administrator) needs some love, or else we won't receive anything due to UIPI
 	if (OSVersionInfo().isVistaOrLater()) {
 		AdjustMessageFilters(MSGFLT_ADD);
 	}
+
+	::SetPropW(hwnd, kIconMouseEventProc, reinterpret_cast<HANDLE>(callback));
+
+	initialized = TRUE;
 }
 
 void TbChatNotification_Destroy()
 {
+	if (!initialized)
+	{
+		return;
+	}
+
+	if (active)
+	{
+		TbChatNotification_DestroyIcon();
+	}
+
+	DestroyWindow(hwnd);
+
 	// Vista (Administrator) needs some unlove, see c'tor
 	if (OSVersionInfo().isVistaOrLater()) {
 		AdjustMessageFilters(MSGFLT_REMOVE);
 	}
+
+	initialized = FALSE;
 }
 
-static void SetupWnd(HWND hwnd)
+BOOL TbChatNotification_CreateIcon(wchar_t *title)
 {
-	if (::GetPropW(hwnd, kOldProc) == 0) {
-		WNDPROC oldProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
-		::SetPropW(hwnd, kOldProc, reinterpret_cast<HANDLE>(oldProc));
-	}
-}
-
-BOOL TbChatNotification_CreateIcon(void *handle, wchar_t *title, mouseevent_callback_t callback)
-{
-	HWND hwnd = (HWND)handle;
-	if (!hwnd)
+	if (active || !initialized)
 	{
 		return FALSE;
 	}
-
-	SetupWnd(hwnd);
 
 	NOTIFYICONDATAW *iconData = new(std::nothrow) NOTIFYICONDATAW;
 	if (!iconData)
@@ -309,23 +366,21 @@ BOOL TbChatNotification_CreateIcon(void *handle, wchar_t *title, mouseevent_call
 	::Shell_NotifyIconW(NIM_ADD, iconData);
 	::Shell_NotifyIconW(NIM_SETVERSION, iconData);
 
-	SetupWnd(hwnd);
 	::SetPropW(hwnd, kIconData, reinterpret_cast<HANDLE>(iconData));
-	::SetPropW(hwnd, kIconMouseEventProc, reinterpret_cast<HANDLE>(callback));
 	::SetPropW(hwnd, kIcon, reinterpret_cast<HANDLE>(0x1));
+
+	active = TRUE;
 
 	return TRUE;
 }
 
-BOOL TbChatNotification_DestroyIcon(void *handle)
+BOOL TbChatNotification_DestroyIcon()
 {
-	HWND hwnd = (HWND)handle;
-	if (!hwnd)
+	if (!active || !initialized)
 	{
 		return FALSE;
 	}
 
-	SetupWnd(hwnd);
 	::RemovePropW(hwnd, kIcon);
 
 	NOTIFYICONDATAW *iconData = reinterpret_cast<NOTIFYICONDATAW *>(::GetPropW(hwnd, kIconData));
@@ -336,20 +391,9 @@ BOOL TbChatNotification_DestroyIcon(void *handle)
 	}
 	::RemovePropW(hwnd, kIconData);
 
-	::RemovePropW(hwnd, kIconMouseEventProc);
+	active = FALSE;
 
 	return TRUE;
-}
-
-void* TbChatNotification_GetBaseWindow(wchar_t *title)
-{
-	void *rv = 0;
-	if (!title)
-	{
-		return rv;
-	}
-	rv = ::FindWindow(0, title);
-	return rv;
 }
 
 static void *operator new(size_t size, std::nothrow_t const &)

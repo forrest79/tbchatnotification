@@ -5,9 +5,12 @@
 <!ENTITY playsound.label "Play sound">
 <!ENTITY playsound.accesskey "P">
 <!ENTITY soundfile.label "Custom sound">
+<!ENTITY playsoundfocused.label "Play sound also for active focused conversation">
+<!ENTITY playsoundfocused.accesskey "F">
 <!ENTITY trayicon.label "Show icon in system tray area">
 <!ENTITY trayicon.accesskey "T">
 <!ENTITY flashicon.label "Flash Thunderbird icon">
 <!ENTITY flashicon.accesskey "F">
-<!ENTITY mucnotify.label "Show notifications from multi-user chats">
-<!ENTITY mucnotify.accesskey "M">
+<!ENTITY allincoming.label "Show notifications for all incoming messages">
+<!ENTITY allincoming.accesskey "A">
+<!ENTITY allincoming.label "(not only for me, like Twitter, Jabber multi-user chats, ...)">

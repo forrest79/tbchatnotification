@@ -17,14 +17,18 @@
 	<prefpane id="paneMain" label="&paneMain.title;">
 		<preferences>
 			<preference id="tbchatnotificationShowBody" name="extensions.tbchatnotification.showbody" type="bool" />
-			<preference id="tbchatnotificationPlaySound" name="extensions.tbchatnotification.playsound" type="bool" />
-			<preference id="tbchatnotificationSoundFile" name="extensions.tbchatnotification.soundfile" type="string" />
+			<preference id="tbchatnotificationPlaySound" name="extensions.tbchatnotification.playsound" type="bool" onchange="tbchatnotification.options.updateControls();" />
+			<preference id="tbchatnotificationSoundFile" name="extensions.tbchatnotification.soundfile" type="string"/>
+			<preference id="tbchatnotificationPlaySoundFocused" name="extensions.tbchatnotification.playsoundfocused" type="bool" />
 			<preference id="tbchatnotificationTrayIcon" name="extensions.tbchatnotification.trayicon" type="bool" />
 			<preference id="tbchatnotificationFlashIcon" name="extensions.tbchatnotification.flashicon" type="bool" />
-			<preference id="tbchatnotificationMUCNotify" name="extensions.tbchatnotification.mucnotify" type="bool" />
+			<preference id="tbchatnotificationAllIncoming" name="extensions.tbchatnotification.allincoming" type="bool" />
 		</preferences>
 		<checkbox preference="tbchatnotificationShowBody" label="&showbody.label;" accesskey="&showbody.accesskey;" />
-		<checkbox preference="tbchatnotificationPlaySound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
+		<hbox>
+			<checkbox preference="tbchatnotificationPlaySound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
+			<checkbox preference="tbchatnotificationPlaySoundFocused" label="&playsoundfocused.label;" accesskey="&playsoundfocused.accesskey;" id="tbchatnotificationPlaySoundFocusedCheckbox" />
+		</hbox>
 		<label control="textSoundFile">&soundfile.label;</label>
 		<hbox>
 			<textbox id="textSoundFile" preference="tbchatnotificationSoundFile" />
@@ -32,7 +36,8 @@
 		</hbox>
 		<checkbox preference="tbchatnotificationTrayIcon" label="&trayicon.label;" accesskey="&trayicon.accesskey;" id="tbchatnotificationTrayIconCheckbox" />
 		<checkbox preference="tbchatnotificationFlashIcon" label="&flashicon.label;" accesskey="&flashicon.accesskey;" />
-		<checkbox preference="tbchatnotificationMUCNotify" label="&mucnotify.label;" accesskey="&mucnotify.accesskey;" />
+		<checkbox preference="tbchatnotificationAllIncoming" label="&allincoming.label;" accesskey="&allincoming.accesskey;" />
+		<label value="&allincoming.info;" style="margin-left: 30px;" />
 	</prefpane>
 
 </prefwindow>

@@ -20,7 +20,7 @@ var TbChatNotifier = {
 	audio : null,
 	
 	trayicon : {
-		instance : null,
+		loaded : false,
 		conversation : ''
 	},
 
@@ -28,9 +28,10 @@ var TbChatNotifier = {
 		showbody : false,
 		playsound : false,
 		soundfile : '',
+		playsoundfocused : false,
 		trayicon : false,
 		flashicon : false,
-		mucnotify : false
+		allincoming : false
 	},
 
 	/**
@@ -60,14 +61,17 @@ var TbChatNotifier = {
 				case 'soundfile' :
 					this.soundfile = prefs.getCharPref('soundfile');
 					break;
+				case 'playsoundfocused' :
+					this.playsoundfocused = prefs.getBoolPref('playsoundfocused');
+					break;
 				case 'trayicon' :
 					this.trayicon = prefs.getBoolPref('trayicon');
 					break;
 				case 'flashicon' :
 					this.flashicon = prefs.getBoolPref('flashicon');
 					break;
-				case 'mucnotify' :
-					this.mucnotify = prefs.getBoolPref('mucnotify');
+				case 'allincoming' :
+					this.allincoming = prefs.getBoolPref('allincoming');
 					break;
 			}
 		}
@@ -76,9 +80,10 @@ var TbChatNotifier = {
 		options.showbody = prefs.getBoolPref('showbody');
 		options.playsound = prefs.getBoolPref('playsound');
 		options.soundfile = prefs.getCharPref('soundfile');
+		options.playsoundfocused = prefs.getBoolPref('playsoundfocused');
 		options.trayicon = prefs.getBoolPref('trayicon');
 		options.flashicon = prefs.getBoolPref('flashicon');
-		options.mucnotify = prefs.getBoolPref('mucnotify');
+		options.allincoming = prefs.getBoolPref('allincoming');
 
 		// Audio
 		this.audio = new Audio();
@@ -96,12 +101,11 @@ var TbChatNotifier = {
 		var notifier = this;
 		var observer = this.observer = {
 			observe: function(subject, topic, data) {
-				if (subject.incoming && (((topic == observerTopics.newDirectedIncomingMessage) && !options.mucnotify) || ((topic == observerTopics.newText) && options.mucnotify))) {
-					notifier.play();
+				if (subject.incoming && (((topic == observerTopics.newDirectedIncomingMessage) && !options.allincoming) || ((topic == observerTopics.newText) && options.allincoming))) {
 					notifier.notify(subject.alias, subject.originalMessage, imServices.conversations.getUIConversation(subject.conversation).title);
 				} else if (topic == observerTopics.unreadImCountChanged) {
 					if (data == 0) {
-						notifier.closeTrayIcon();
+						notifier.closeTrayIcon()
 					}
 				}
 			},
@@ -127,20 +131,18 @@ var TbChatNotifier = {
 			Services.obs.removeObserver(observer, observerTopics[topic]);
 		}
 		
-		this.closeTrayIcon()
+		if (this.trayicon.loaded) {
+			TrayIcon.destroy();
+		}
 	},
 
 	/**
 	* Play sound.
 	*/
 	play : function() {
-		var audio = this.audio,
-			options = this.options;
-
-		if (options.playsound) {
-			audio.src = (options.soundfile ? ('file://' + options.soundfile) : 'chrome://TbChatNotification/content/sound/notification.ogg') + '#t=,5';
-			audio.play();
-		}
+		var audio = this.audio;
+		audio.src = (options.soundfile ? ('file://' + options.soundfile) : 'chrome://TbChatNotification/content/sound/notification.ogg') + '#t=,5';
+		audio.play();
 	},
 
 	/**
@@ -151,7 +153,16 @@ var TbChatNotifier = {
 	 */
 	notify : function(from, message, conversation) {
 		var notifier = this,
-			options = this.options;
+			options = this.options,
+			activeConversation = this.isConversationActive(conversation);
+
+		if (options.playsound && (!activeConversation || options.playsoundfocused)) {
+			this.play();
+		}
+
+		if (activeConversation) {
+			return;
+		}
 
 		var title = this.string('newmessage') + ' ' + from,
 			text = options.showbody ? (message > 128 ? (message.substring(0, 128) + '...') : message) : this.string('showmessage');
@@ -160,7 +171,7 @@ var TbChatNotifier = {
 			var	listener = {
 				observe : function(subject, topic, data) {
 					if (topic == 'alertclickcallback') {
-						this.openChat(data);
+						notifier.openChat(data);
 					}
 				}
 			}
@@ -178,15 +189,23 @@ var TbChatNotifier = {
 			
 			trayicon.conversation = conversation;
 
-			if (!trayicon.instance) {
-				Cu.import('resource://TbChatNotification/trayiconservice.jsm');
+			if (!trayicon.loaded) {
+				Cu.import('resource://TbChatNotification/trayicon.jsm');
 
-				window.addEventListener('TrayDblClick', function(event) {
-						notifier.openChat(trayicon.conversation);
+				TrayIcon.init(window);
+
+				window.addEventListener('TrayIconDblClick', function() {
+					notifier.openChat(trayicon.conversation);
 				}, true);
+
+				window.addEventListener('focus', function() {
+					notifier.closeTrayIcon();
+				}, false);
+
+				trayicon.loaded = true;
 			}
-			
-			trayicon.instance = TrayIconService.createIcon(window, title);
+
+			TrayIcon.show(title);
 		}
 
 		if (options.flashicon) {
@@ -194,9 +213,37 @@ var TbChatNotifier = {
 		}
 	},
 
+	/**
+	 * Check if is focused chat windows with active conversation.
+	 * @param string conversation
+	 * @return bool
+	 */
+	isConversationActive : function(conversation) {
+		if (!document.hasFocus()) {
+			return false;
+		}
+
+		var tab = document.getElementById('tabmail').selectedTab;
+		if (!tab || (tab.title.toLowerCase().indexOf('chat') != 0)) {
+			return false;
+		}
+
+		var contactList = document.getElementById('contactlistbox');
+		if (!contactList) {
+			return false;
+		}
+
+		var selectedConversation = contactList.selectedItem;
+		if (!selectedConversation) {
+			return false;
+		}
+
+		return selectedConversation.displayName == conversation;
+	},
+
 	/*
 	 * Open chat tab with conversation.
-	 * @param conversation string
+	 * @param string conversation
 	 */
 	openChat : function(conversation) {
 		try {
@@ -230,9 +277,8 @@ var TbChatNotifier = {
 	 * Close tray icon.
 	 */
 	closeTrayIcon : function() {
-		var trayicon = this.trayicon;
-		if (trayicon.instance) {
-			trayicon.instance.close();
+		if (this.trayicon.loaded) {
+			TrayIcon.close();
 		}
 	},
 
@@ -246,13 +292,13 @@ var TbChatNotifier = {
 
 	/**
 	* Get element on document.
-	* @param id string
+	* @param string id
 	* @return object XUL
 	*/
 	$ : function(id) {
-		id = 'tbchatnotification' + id;
-		if (document.getElementById(id)) {
-			return document.getElementById(id);
+		var element = document.getElementById('tbchatnotification' + id);
+		if (element) {
+			return element;
 		} else {
 			throw 'No element "' + id + '".';
 		}

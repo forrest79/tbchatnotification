@@ -5,9 +5,12 @@
 <!ENTITY playsound.label "Přehrát zvuk">
 <!ENTITY playsound.accesskey "P">
 <!ENTITY soundfile.label "Vlastní zvuk">
+<!ENTITY playsoundfocused.label "Přehrát zvuk i pro aktivní zobrazenou konverzaci">
+<!ENTITY playsoundfocused.accesskey "A">
 <!ENTITY trayicon.label "Zobrazit ikonu v oznamovací oblasti">
 <!ENTITY trayicon.accesskey "O">
 <!ENTITY flashicon.label "Rozblikat ikonu Thunderbirdu">
 <!ENTITY flashicon.accesskey "B">
-<!ENTITY mucnotify.label "Zobrazovat upozornění z více-uživatelských chatů">
-<!ENTITY mucnotify.accesskey "V">
+<!ENTITY allincoming.label "Zobrazovat notifikace pro všechny příchozí zprávy">
+<!ENTITY allincoming.accesskey "V">
+<!ENTITY allincoming.info "(nejenom určené přímo mě, jako Twitter, více-uživatelských chatů na Jabberu, ...)">

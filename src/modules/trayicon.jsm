@@ -4,7 +4,7 @@
 
 "use strict";
 
-const EXPORTED_SYMBOLS = ['TrayIconService'];
+const EXPORTED_SYMBOLS = ['TrayIcon'];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
@@ -56,7 +56,7 @@ function loadLibrary({m , c}) {
 	return [ctypes.open(resource.path), c];
 }
 
-var _icon;
+var _window;
 
 const abi_t = ctypes.default_abi;
 
@@ -87,12 +87,12 @@ var char_ptr_t;
 try {
 	// Try to load the library according to XPCOMABI
 	[traylib, char_ptr_t] = loadLibrary(_libraries[Services.appinfo.XPCOMABI]);
-} catch (ex) {
+} catch (e) {
 	// XPCOMABI yielded wrong results; try alternative libraries
 	for (let [,l] in Iterator(_libraries)) {
 		try {
 			[traylib, char_ptr_t] = loadLibrary(l);
-		} catch (ex) {
+		} catch (e) {
 			// no op
 		}
 	}
@@ -104,79 +104,43 @@ try {
 const _Init = traylib.declare(
 	'TbChatNotification_Init',
 	abi_t,
-	ctypes.void_t // retval
+	ctypes.void_t, // retval
+	mouseevent_callback_t // callback
 );
 const _Destroy = traylib.declare(
 	'TbChatNotification_Destroy',
 	abi_t,
 	ctypes.void_t // retval
 );
-const _GetBaseWindowHandle = traylib.declare(
-	'TbChatNotification_GetBaseWindow',
-	abi_t,
-	handle_t, // retval handle
-	char_ptr_t // title
-);
 const _CreateIcon = traylib.declare(
 	'TbChatNotification_CreateIcon',
 	abi_t,
 	ctypes.int, // retval BOOL
-	handle_t, // handle
-	char_ptr_t, // title
-	mouseevent_callback_t // callback
+	char_ptr_t // title
 );
 const _DestroyIcon = traylib.declare(
 	'TbChatNotification_DestroyIcon',
 	abi_t,
-	ctypes.int, // retval BOOL
-	handle_t // handle
+	ctypes.int // retval BOOL
 );
-
-function GetBaseWindowHandle(window) {
-	let baseWindow = window
-		.QueryInterface(Ci.nsIInterfaceRequestor)
-		.getInterface(Ci.nsIWebNavigation)
-		.QueryInterface(Ci.nsIBaseWindow);
-
-	// Tag the base window
-	let oldTitle = baseWindow.title;
-	baseWindow.title = Services.uuid.generateUUID().toString();
-
-	let rv;
-	try {
-		// Search the window by the new title
-		rv = _GetBaseWindowHandle(baseWindow.title);
-		if (rv.isNull()) {
-			throw new Error('Window not found!');
-		}
-	} finally {
-		// Restore
-		baseWindow.title = oldTitle;
-	}
-	return rv;
-}
-
-function ptrcmp(p1, p2) {
-	return p1.toString() == p2.toString();
-}
 
 const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(handle, event) {
 	try {
 		event = event.contents;
-		if (_icon && ptrcmp(_icon.handle, handle)) {
-			let document = _icon.window.document;
+		if (_window) {
+			let document = _window.document;
 			let e = document.createEvent('MouseEvents');
-			let et = 'TrayClick';
+			let et = 'TrayIconClick';
 			if (event.clickCount == 2) {
-				et = 'TrayDblClick';
+				et = 'TrayIconDblClick';
 			} else if (event.clickCount > 2) {
-				et = 'TrayTriClick';
+				et = 'TrayIconTriClick';
 			}
 			e.initMouseEvent(
 				et,
 				true,
 				true,
-				_icon.window,
+				_window,
 				0,
 				event.x,
 				event.y,
@@ -198,56 +162,23 @@ const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(h
 	}
 });
 
-/**
- * TrayIcon class
- */
+const TrayIcon = {
 
-function TrayIcon(window, title) {
-	this._handle = GetBaseWindowHandle(window);
-	try {
-		_CreateIcon(this._handle, title, mouseevent_callback);
-	} catch (ex) {
-		delete this._handle;
-		throw ex;
-	}
+	init : function(window) {
+		_Init(mouseevent_callback);
+		_window = window;
+	},
 
-	this._window = window;
-}
+	destroy : function() {
+		_Destroy();
+	},
 
-TrayIcon.prototype = {
-	get handle() this._handle,
-	get window() this._window,
-	get isClosed() this._closed,
+	show : function(title) {
+		_CreateIcon(title);
+	},
+
 	close : function() {
-		if (this._closed) {
-			return;
-		}
-		this._closed = true;
-
-		_DestroyIcon(this._handle);
-		TrayIconService._closeIcon();
-
-		delete this._handle;
-		delete this._window;
-	},
-	toString : function() {
-		return '[Icon @' + this._handle + ']';
+		_DestroyIcon();
 	}
-};
 
-const TrayIconService = {
-	createIcon : function(window, title) {
-		if (!_icon) {
-			_icon = new TrayIcon(window, title);
-		}
-		return _icon;
-	},
-	_closeIcon : function() {
-		if (_icon) {
-			_icon.close();
-		}
-		_icon = null;
-	}
 };
-
-_Init();
