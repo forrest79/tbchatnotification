@@ -28,6 +28,9 @@ void TbChatNotification_Destroy();
 BOOL TbChatNotification_CreateIcon(wchar_t *title);
 BOOL TbChatNotification_DestroyIcon();
 
+void* TbChatNotification_GetBaseWindow(wchar_t *title);
+void TbChatNotification_RestoreWindow(void *handle);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

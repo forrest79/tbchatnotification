@@ -195,6 +195,7 @@ var TbChatNotifier = {
 				TrayIcon.init(window);
 
 				window.addEventListener('TrayIconDblClick', function() {
+					TrayIcon.restoreThunderbird();
 					notifier.openChat(trayicon.conversation);
 				}, true);
 

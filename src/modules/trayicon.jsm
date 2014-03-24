@@ -123,6 +123,43 @@ const _DestroyIcon = traylib.declare(
 	abi_t,
 	ctypes.int // retval BOOL
 );
+const _GetBaseWindowHandle = traylib.declare(
+	'TbChatNotification_GetBaseWindow',
+	abi_t,
+	handle_t, // retval handle
+	char_ptr_t // title
+);
+const _RestoreWindow = traylib.declare(
+	'TbChatNotification_RestoreWindow',
+	abi_t,
+	ctypes.void_t, // retval BOOL
+	handle_t // handle
+);
+
+function GetBaseWindowHandle(window) {
+	var baseWindow = window
+		.QueryInterface(Ci.nsIInterfaceRequestor)
+		.getInterface(Ci.nsIWebNavigation)
+		.QueryInterface(Ci.nsIBaseWindow);
+
+	// Tag the base window
+	var oldTitle = baseWindow.title;
+	baseWindow.title = Services.uuid.generateUUID().toString();
+
+	let rv;
+	try {
+		// Search the window by the new title
+		rv = _GetBaseWindowHandle(baseWindow.title);
+		if (rv.isNull()) {
+			throw new Error('Window not found!');
+		}
+	}
+	finally {
+		// Restore
+		baseWindow.title = oldTitle;
+	}
+	return rv;
+}
 
 const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(handle, event) {
 	try {
@@ -164,8 +201,11 @@ const mouseevent_callback = mouseevent_callback_t(function mouseevent_callback(h
 
 const TrayIcon = {
 
+	tbHandle : null,
+
 	init : function(window) {
 		_Init(mouseevent_callback);
+		this.tbHandle = GetBaseWindowHandle(window);
 		_window = window;
 	},
 
@@ -179,6 +219,10 @@ const TrayIcon = {
 
 	close : function() {
 		_DestroyIcon();
+	},
+
+	restoreThunderbird : function() {
+		_RestoreWindow(this.tbHandle);
 	}
 
 };

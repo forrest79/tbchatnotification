@@ -5,7 +5,6 @@
 #include <windows.h>
 #include <string.h>
 #include <new>
-#include <stdio.h> 
 
 #include "trayicon.h"
 #include "resource.h"
@@ -394,6 +393,34 @@ BOOL TbChatNotification_DestroyIcon()
 	active = FALSE;
 
 	return TRUE;
+}
+
+void* TbChatNotification_GetBaseWindow(wchar_t *title)
+{
+	void *rv = 0;
+	if (!title) {
+		return rv;
+	}
+	rv = ::FindWindow(0, title);
+	return rv;
+}
+
+void TbChatNotification_RestoreWindow(void *handle)
+{
+	HWND hwnd = (HWND)handle;
+	if (!hwnd) {
+		return;
+	}
+
+	// Show the window again
+	::ShowWindow(hwnd, SW_SHOW);
+
+	// If it was minimized then restore it as well
+	if (::IsIconic(hwnd)) {
+		::ShowWindow(hwnd, SW_RESTORE);
+	}
+	// Try to grab focus
+	::SetForegroundWindow(hwnd);
 }
 
 static void *operator new(size_t size, std::nothrow_t const &)
