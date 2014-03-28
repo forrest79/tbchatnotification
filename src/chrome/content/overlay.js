@@ -85,9 +85,6 @@ var TbChatNotifier = {
 		options.flashicon = prefs.getBoolPref('flashicon');
 		options.allincoming = prefs.getBoolPref('allincoming');
 
-		// Audio
-		this.audio = new Audio();
-
 		// Messages listener
 		Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 		Cu.import('resource://gre/modules/Services.jsm');
@@ -140,8 +137,14 @@ var TbChatNotifier = {
 	* Play sound.
 	*/
 	play : function() {
-		var audio = this.audio;
-		audio.src = (options.soundfile ? ('file://' + options.soundfile) : 'chrome://TbChatNotification/content/sound/notification.ogg') + '#t=,5';
+		var audio = this.audio,
+			options = this.options;
+
+		if (!audio) {
+			audio = new Audio();
+		}
+
+		audio.src = (options.soundfile ? ('file://' + options.soundfile) : 'chrome://TbChatNotification/content/sound/notification.ogg');
 		audio.play();
 	},
 

@@ -13,4 +13,4 @@
 <!ENTITY flashicon.accesskey "F">
 <!ENTITY allincoming.label "Show notifications for all incoming messages">
 <!ENTITY allincoming.accesskey "A">
-<!ENTITY allincoming.label "(not only for me, like Twitter, Jabber multi-user chats, ...)">
+<!ENTITY allincoming.info "(not only for me, like Twitter, Jabber multi-user chats, ...)">
