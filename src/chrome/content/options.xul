@@ -16,6 +16,7 @@
 	<!-- OPTIONS PANE -->
 	<prefpane id="paneMain" label="&paneMain.title;">
 		<preferences>
+			<preference id="tbchatnotificationShowNotification" name="extensions.tbchatnotification.shownotification" type="bool" onchange="tbchatnotification.options.updateControls();" />
 			<preference id="tbchatnotificationShowBody" name="extensions.tbchatnotification.showbody" type="bool" />
 			<preference id="tbchatnotificationPlaySound" name="extensions.tbchatnotification.playsound" type="bool" onchange="tbchatnotification.options.updateControls();" />
 			<preference id="tbchatnotificationSoundFile" name="extensions.tbchatnotification.soundfile" type="string"/>
@@ -24,7 +25,10 @@
 			<preference id="tbchatnotificationFlashIcon" name="extensions.tbchatnotification.flashicon" type="bool" />
 			<preference id="tbchatnotificationAllIncoming" name="extensions.tbchatnotification.allincoming" type="bool" />
 		</preferences>
-		<checkbox preference="tbchatnotificationShowBody" label="&showbody.label;" accesskey="&showbody.accesskey;" />
+		<hbox>
+			<checkbox preference="tbchatnotificationShowNotification" label="&shownotification.label;" accesskey="&shownotification.accesskey;" />
+			<checkbox preference="tbchatnotificationShowBody" label="&showbody.label;" accesskey="&showbody.accesskey;" id="tbchatnotificationShowBodyCheckbox" />
+		</hbox>
 		<hbox>
 			<checkbox preference="tbchatnotificationPlaySound" label="&playsound.label;" accesskey="&playsound.accesskey;" />
 			<checkbox preference="tbchatnotificationPlaySoundFocused" label="&playsoundfocused.label;" accesskey="&playsoundfocused.accesskey;" id="tbchatnotificationPlaySoundFocusedCheckbox" />

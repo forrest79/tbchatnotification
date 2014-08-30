@@ -24,6 +24,7 @@ Run build/build-xpi.bat on Windows or build/build-xpi.sh on Linux. You need only
 
 HISTORY
 =======
+1.3.0 [2014-08-30] - Add option to enable/disable alert notification (automaticaly disable for Thunderbird 31>, because it has own alert notification and if both are active, no notification work)
 1.2.0 [2014-03-20] - New icon, tray icon notification (only for Windows)
 1.1.0 [2014-03-16] - Can flash Thunderbird icon, add posibility to notify for messages from multi-user chats
 1.0.1 [2014-01-31] - Minimal Mozilla Thunderbird version set to 15 (first with chat), update depracated interfaces and some warnings, max sound time set to 5s

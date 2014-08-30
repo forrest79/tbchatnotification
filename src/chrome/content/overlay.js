@@ -25,6 +25,7 @@ var TbChatNotifier = {
 	},
 
 	options : {
+		shownotification : true,
 		showbody : false,
 		playsound : false,
 		soundfile : '',
@@ -44,7 +45,7 @@ var TbChatNotifier = {
 		  .getService(Ci.nsIPrefService)
 		  .getBranch('extensions.tbchatnotification.');
 		prefs.QueryInterface(Ci.nsIPrefBranch);
-		
+
 		var options = this.options;
 		options.observe = function(subject, topic, data) {
 			if (topic != 'nsPref:changed') {
@@ -52,6 +53,9 @@ var TbChatNotifier = {
 			}
 
 			switch(data) {
+				case 'shownotification' :
+					this.shownotification = prefs.getBoolPref('shownotification');
+					break;
 				case 'showbody' :
 					this.showbody = prefs.getBoolPref('showbody');
 					break;
@@ -76,7 +80,23 @@ var TbChatNotifier = {
 			}
 		}
 		prefs.addObserver('', options, false);
-		
+
+		if (!prefs.getBoolPref('versiondetect')) {
+			var appInfo = Components
+				.classes['@mozilla.org/xre/app-info;1']
+				.getService(Components.interfaces.nsIXULAppInfo);
+			var versionChecker = Components
+				.classes['@mozilla.org/xpcom/version-comparator;1']
+				.getService(Components.interfaces.nsIVersionComparator);
+
+			// disable for Thunderbird > 31, there is another chat notification system
+			if (versionChecker.compare(appInfo.version, '31') >= 0) {
+				prefs.setBoolPref('versiondetect', true);
+				prefs.setBoolPref('shownotification', false);
+			}
+		}
+
+		options.shownotification = prefs.getBoolPref('shownotification');
 		options.showbody = prefs.getBoolPref('showbody');
 		options.playsound = prefs.getBoolPref('playsound');
 		options.soundfile = prefs.getCharPref('soundfile');
@@ -170,21 +190,23 @@ var TbChatNotifier = {
 		var title = this.string('newmessage') + ' ' + from,
 			text = options.showbody ? (message > 128 ? (message.substring(0, 128) + '...') : message) : this.string('showmessage');
 
-		try {
-			var	listener = {
-				observe : function(subject, topic, data) {
-					if (topic == 'alertclickcallback') {
-						notifier.openChat(data);
+		if (options.shownotification) {
+			try {
+				var	listener = {
+					observe : function(subject, topic, data) {
+						if (topic == 'alertclickcallback') {
+							notifier.openChat(data);
+						}
 					}
 				}
+
+				Cc['@mozilla.org/alerts-service;1']
+					.getService(Ci.nsIAlertsService)
+					.showAlertNotification('chrome://TbChatNotification/skin/icon32.png', title, text, true, conversation, listener);
+
+			} catch(e) {
+				// prevents runtime error on platforms that don't implement nsIAlertsService
 			}
-
-			Cc['@mozilla.org/alerts-service;1']
-				.getService(Ci.nsIAlertsService)
-				.showAlertNotification('chrome://TbChatNotification/skin/icon32.png', title, text, true, conversation, listener);
-
-		} catch(e) {
-			// prevents runtime error on platforms that don't implement nsIAlertsService
 		}
 
 		if (osWindows && options.trayicon) {

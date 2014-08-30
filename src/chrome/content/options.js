@@ -45,6 +45,7 @@ var options = {
 	 * Update control properties.
 	 */
 	updateControls : function() {
+		this.$('ShowBodyCheckbox').disabled = !this.$('ShowNotification').value;
 		this.$('PlaySoundFocusedCheckbox').disabled = !this.$('PlaySound').value;
 	},
 

@@ -1,5 +1,7 @@
 <!ENTITY prefwindow.title "Thunderbird Chat Notification - nastavení">
 <!ENTITY paneMain.title "Hlavní">
+<!ENTITY shownotification.label "Zobrazit upozornění">
+<!ENTITY shownotification.accesskey "U">
 <!ENTITY showbody.label "Zobrazit text zprávy">
 <!ENTITY showbody.accesskey "Z">
 <!ENTITY playsound.label "Přehrát zvuk">
